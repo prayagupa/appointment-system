@@ -1,0 +1,153 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-tenant
+      author: appointment-rpc
+      changes:
+        - createTable:
+            tableName: tenant
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 002-provider
+      author: appointment-rpc
+      changes:
+        - createTable:
+            tableName: provider
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_provider_tenant
+                    references: tenant(id)
+              - column:
+                  name: display_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: specialty
+                  type: varchar(255)
+
+  - changeSet:
+      id: 003-appointment
+      author: appointment-rpc
+      changes:
+        - createTable:
+            tableName: appointment
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_appointment_tenant
+                    references: tenant(id)
+              - column:
+                  name: provider_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_appointment_provider
+                    references: provider(id)
+              - column:
+                  name: patient_ref
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_time
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: duration_minutes
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: bigint
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: appointment
+            columnNames: tenant_id, provider_id, start_time
+            constraintName: uk_appointment_slot
+
+  - changeSet:
+      id: 004-availability
+      author: appointment-rpc
+      changes:
+        - createTable:
+            tableName: availability
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: provider_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_availability_provider
+                    references: provider(id)
+              - column:
+                  name: day_of_week
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_time
+                  type: time
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_time
+                  type: time
+                  constraints:
+                    nullable: false

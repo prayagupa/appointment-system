@@ -1,6 +1,6 @@
 # Software Design Specification (SDS)
 
-## Provider Appointment Platform (doctorhere)
+## Provider Appointment Platform (appointment-rpc)
 
 | Field | Value |
 |-------|--------|
@@ -9,6 +9,51 @@
 | Status | Draft |
 | Product | Multi-tenant appointment scheduling |
 | Runtime | Java 25, Spring Boot 4.x, gRPC |
+
+---
+
+## Table of contents
+
+1. [Introduction](#1-introduction)
+   - [1.1 Purpose](#11-purpose)
+   - [1.2 Scope](#12-scope)
+   - [1.3 Definitions](#13-definitions)
+   - [1.4 References](#14-references)
+   - [1.5 Business line](#15-business-line)
+2. [System overview](#2-system-overview)
+   - [2.1 Problem statement](#21-problem-statement)
+   - [2.2 Goals](#22-goals)
+   - [2.3 System state](#23-system-state)
+3. [Architecture](#3-architecture)
+   - [3.1 Technology stack](#31-technology-stack)
+   - [3.2 Logical architecture](#32-logical-architecture)
+   - [3.3 Layering](#33-layering)
+   - [3.4 Deployment view](#34-deployment-view)
+4. [Component design](#4-component-design)
+   - [4.1 Components](#41-components)
+   - [4.2 Module layout](#42-module-layout)
+5. [Interface design](#5-interface-design)
+   - [5.1 gRPC API (primary)](#51-grpc-api-primary)
+   - [5.2 Application services (internal)](#52-application-services-internal)
+   - [5.3 Error model](#53-error-model)
+6. [Data design](#6-data-design)
+   - [6.1 Conceptual model](#61-conceptual-model)
+   - [6.2 Tenant types](#62-tenant-types)
+   - [6.3 Multi-tenancy](#63-multi-tenancy)
+   - [6.4 Persistence](#64-persistence)
+7. [Key flows](#7-key-flows)
+   - [7.1 Book appointment](#71-book-appointment)
+   - [7.2 Local development](#72-local-development)
+8. [Security](#8-security)
+9. [Non-functional requirements](#9-non-functional-requirements)
+10. [Build and deployment](#10-build-and-deployment)
+    - [10.1 Repository layout (target)](#101-repository-layout-target)
+    - [10.2 Key dependencies (Maven)](#102-key-dependencies-maven)
+    - [10.3 Runbook (development)](#103-runbook-development)
+    - [10.4 Production deployment](#104-production-deployment)
+11. [Migration roadmap](#11-migration-roadmap)
+12. [Open issues](#12-open-issues)
+13. [Document history](#13-document-history)
 
 ---
 
@@ -80,7 +125,7 @@ Organizations need a shared platform to manage appointments across multiple tena
 | Client | gRPC client (any language) |
 | Domain | Appointments, providers, tenants |
 | Tenancy | Tenant-scoped data and configuration |
-| Persistence | PostgreSQL + Flyway migrations |
+| Persistence | PostgreSQL + Liquibase migrations |
 | Build | Maven or Gradle |
 
 ---
@@ -91,13 +136,13 @@ Organizations need a shared platform to manage appointments across multiple tena
 
 | Concern | Choice | Notes |
 |---------|--------|--------|
-| Language | Java 21+ | Aligns with current JDK direction |
+| Language | Java 25 | Aligns with current JDK direction |
 | Framework | Spring Boot 4.x | DI, config, Actuator, testing |
 | API | gRPC + protobuf | Primary integration surface |
 | Persistence | Spring Data JPA, Hibernate | Entities + repositories |
-| Database | PostgreSQL 16+ | Tenant-scoped relational data |
-| Migrations | Flyway | Versioned schema in `src/main/resources/db/migration` |
-| Build | Maven (recommended) or Gradle | `protobuf-maven-plugin` for codegen |
+| Database | PostgreSQL 17+ | Tenant-scoped relational data |
+| Migrations | Liquibase | Versioned schema in `src/main/resources/db/migration` |
+| Build | Gradle | `protobuf-maven-plugin` for codegen |
 | Observability | Micrometer, OpenTelemetry | Metrics and distributed tracing |
 | Packaging | Docker | Multi-stage build; no JBoss/WildFly |
 
@@ -110,7 +155,7 @@ flowchart TB
         GW[API gateway - future]
     end
 
-    subgraph app [doctorhere-service - Spring Boot]
+    subgraph app [appointment-rpc-service - Spring Boot]
         GRPC[gRPC server - grpc-spring-boot-starter]
         SVC[Application services]
         DOM[Domain model]
@@ -177,12 +222,12 @@ flowchart LR
 ### 4.2 Module layout
 
 ```
-doctorhere/
+appointment-rpc/
 ├── pom.xml
 ├── Dockerfile
 ├── docker-compose.yml          # app + postgres for local dev
 ├── src/main/java/com/zazzercode/
-│   ├── DoctorhereApplication.java
+│   ├── AppointmentRpcApplication.java
 │   ├── grpc/                   # @GrpcService implementations
 │   ├── service/                # @Service use cases
 │   ├── domain/                 # JPA entities
@@ -192,7 +237,7 @@ doctorhere/
 │   └── appointment/v1/appointment.proto
 ├── src/main/resources/
 │   ├── application.yml
-│   └── db/migration/           # Flyway SQL
+│   └── db/migration/           # Liquibase SQL
 └── src/test/java/              # @SpringBootTest, Testcontainers
 ```
 
@@ -320,7 +365,7 @@ erDiagram
 ### 6.4 Persistence
 
 - **ORM**: Jakarta Persistence latest via Hibernate latest.
-- **Migrations**: Flyway; no `hbm2ddl.auto=update` in production.
+- **Migrations**: Liquibase; no `hbm2ddl.auto=update` in production.
 - **IDs**: UUID v4 for all external references.
 - **Connection pool**: HikariCP (Spring Boot default).
 
@@ -352,7 +397,7 @@ sequenceDiagram
 ### 7.2 Local development
 
 1. `docker compose up -d` — starts PostgreSQL (and optionally the app).
-2. `mvn spring-boot:run` — Flyway migrates schema; gRPC listens on **9090**.
+2. `mvn spring-boot:run` — Liquibase migrates schema; gRPC listens on **9090**.
 3. Run sample client or `grpcurl` against `ListAvailability` / `GetProvider`.
 
 ---
@@ -386,7 +431,7 @@ sequenceDiagram
 ### 10.1 Repository layout (target)
 
 ```
-doctorhere-ejb/                   # repo name; service module may rename later
+appointment-rpc/                   # repo name; service module may rename later
 ├── src/                          # Spring Boot application
 ├── docs/
 │   ├── thoughts.md
@@ -401,7 +446,7 @@ doctorhere-ejb/                   # repo name; service module may rename later
 - `spring-boot-starter-data-jpa`
 - `grpc-spring-boot-starter` (or `grpc-netty-shaded` + manual wiring)
 - `protobuf-java`, `grpc-stub`, `grpc-protobuf`
-- `postgresql`, `flyway-core`
+- `postgresql`, `liquibase-core`
 - `spring-boot-starter-actuator`
 - Test: `spring-boot-starter-test`, `testcontainers-postgresql`
 
@@ -426,7 +471,7 @@ mvn clean spring-boot:run
 
 | Phase | Deliverable |
 |-------|-------------|
-| **1** | Spring Boot skeleton, PostgreSQL, Flyway, `GetProvider` gRPC |
+| **1** | Spring Boot skeleton, PostgreSQL, liquibase, `GetProvider` gRPC |
 | **2** | `Tenant`, `Provider`, `Appointment` entities + repositories |
 | **3** | `BookAppointment`, `CancelAppointment`, tenant metadata interceptor |
 | **4** | Availability rules, conflict detection, Testcontainers integration tests |
@@ -439,7 +484,7 @@ mvn clean spring-boot:run
 | ID | Topic | Decision needed |
 |----|--------|-----------------|
 | O-1 | gRPC framework | `grpc-spring-boot-starter` vs plain `grpc-java` |
-| O-2 | Module rename | Keep `doctorhere-ejb` repo name vs rename to `doctorhere-service` |
+| O-2 | Module rename | Keep `appointment-rpc` repo name |
 | O-3 | Patient identity | Opaque `patient_ref` only vs external patient registry |
 | O-4 | Row Level Security | Application-only tenant filter vs PostgreSQL RLS |
 

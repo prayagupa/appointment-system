@@ -1,0 +1,7 @@
+spring:
+  liquibase:
+    contexts: dev
+
+appointment:
+  auth:
+    enabled: false

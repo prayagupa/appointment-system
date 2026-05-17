@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package appointment.v1;
+
+option java_multiple_files = true;
+option java_package = "com.zazzercode.grpc.appointment.v1";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+service AppointmentService {
+  rpc GetProvider(GetProviderRequest) returns (Provider);
+  rpc GetAppointment(GetAppointmentRequest) returns (Appointment);
+  rpc BookAppointment(BookAppointmentRequest) returns (BookAppointmentResponse);
+  rpc CancelAppointment(CancelAppointmentRequest) returns (google.protobuf.Empty);
+  rpc ListAvailability(ListAvailabilityRequest) returns (ListAvailabilityResponse);
+}
+
+message GetProviderRequest {
+  string provider_id = 1;
+}
+
+message GetAppointmentRequest {
+  string appointment_id = 1;
+}
+
+message BookAppointmentRequest {
+  string provider_id = 1;
+  string patient_ref = 2;
+  google.protobuf.Timestamp start_time = 3;
+  int32 duration_minutes = 4;
+}
+
+message BookAppointmentResponse {
+  string appointment_id = 1;
+  string status = 2;
+}
+
+message CancelAppointmentRequest {
+  string appointment_id = 1;
+}
+
+message ListAvailabilityRequest {
+  string provider_id = 1;
+  google.protobuf.Timestamp range_start = 2;
+  google.protobuf.Timestamp range_end = 3;
+  int32 slot_duration_minutes = 4;
+}
+
+message ListAvailabilityResponse {
+  repeated TimeSlot slots = 1;
+}
+
+message Provider {
+  string id = 1;
+  string tenant_id = 2;
+  string display_name = 3;
+  string specialty = 4;
+}
+
+message Appointment {
+  string id = 1;
+  string tenant_id = 2;
+  string provider_id = 3;
+  string patient_ref = 4;
+  google.protobuf.Timestamp start_time = 5;
+  int32 duration_minutes = 6;
+  string status = 7;
+}
+
+message TimeSlot {
+  google.protobuf.Timestamp start_time = 1;
+  google.protobuf.Timestamp end_time = 2;
+}

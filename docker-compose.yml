@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: appointment
+      POSTGRES_USER: appointment
+      POSTGRES_PASSWORD: appointment
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appointment -d appointment"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  appointment-rpc:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: appointment
+      DB_USER: appointment
+      DB_PASSWORD: appointment
+      SPRING_LIQUIBASE_CONTEXTS: dev
+      AUTH_ENABLED: "false"
+      GRPC_TLS_ENABLED: "false"
+    ports:
+      - "8080:8080"
+      - "9090:9090"

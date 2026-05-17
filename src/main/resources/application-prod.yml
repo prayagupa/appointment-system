@@ -1,0 +1,12 @@
+spring:
+  liquibase:
+    contexts: prod
+
+appointment:
+  auth:
+    enabled: true
+
+grpc:
+  server:
+    security:
+      enabled: true
