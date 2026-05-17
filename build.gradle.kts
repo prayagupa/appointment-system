@@ -5,7 +5,7 @@ plugins {
     id("com.google.protobuf") version "0.9.4"
 }
 
-group = "com.zazzercode"
+group = "com.pratyabhi"
 version = "0.1.0-SNAPSHOT"
 
 java {
@@ -24,6 +24,8 @@ val protobufVersion = "3.25.5"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.liquibase:liquibase-core")
     runtimeOnly("org.postgresql:postgresql")

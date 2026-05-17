@@ -86,7 +86,7 @@ Resolve before Phase 1 coding. Track outcomes in this table.
 | Topic | Recommendation | Rationale |
 |-------|----------------|-----------|
 | Build tool | **Gradle** (Kotlin DSL) | Matches SDS §3.1; align runbook in SDS §10.3 with Gradle |
-| Package root | `com.zazzercode` | Matches SDS module layout |
+| Package root | `com.pratyabhi` | Matches SDS module layout |
 | Migration tool path | `src/main/resources/db/changelog/` | Liquibase convention (not Flyway-style `migration/`) |
 | Dev database | Docker Compose PostgreSQL 17 | Matches SDS stack |
 

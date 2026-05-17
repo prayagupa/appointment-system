@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pratyabhi — Appointments</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Instrument+Serif&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <p class="brand-eyebrow">Pratyabhi</p>
+          <h1>Appointment scheduling</h1>
+        </div>
+      </div>
+      <p class="brand-tagline">Multi-tenant booking for healthcare and other providers</p>
+    </header>
+
+    <section class="panel setup-panel">
+      <h2>Organization</h2>
+      <div class="field-grid">
+        <label class="field">
+          <span>Tenant</span>
+          <select id="tenantSelect" aria-label="Select tenant"></select>
+        </label>
+        <label class="field">
+          <span>Provider</span>
+          <select id="providerSelect" aria-label="Select provider" disabled></select>
+        </label>
+      </div>
+    </section>
+
+    <main class="main-grid">
+      <section class="panel book-panel">
+        <h2>Book appointment</h2>
+        <form id="bookForm" class="book-form">
+          <label class="field">
+            <span>Patient reference</span>
+            <input id="patientRef" type="text" placeholder="e.g. patient-001" required>
+          </label>
+          <label class="field">
+            <span>Date</span>
+            <input id="bookDate" type="date" required>
+          </label>
+          <label class="field">
+            <span>Available slot</span>
+            <select id="slotSelect" required disabled>
+              <option value="">Select a date first</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Duration (minutes)</span>
+            <input id="duration" type="number" value="30" min="15" step="15" required>
+          </label>
+          <button type="submit" class="btn btn-primary" id="bookBtn" disabled>Book appointment</button>
+        </form>
+        <p id="bookMessage" class="message" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="panel list-panel">
+        <div class="panel-head">
+          <h2>Appointments</h2>
+          <button type="button" class="btn btn-ghost" id="refreshBtn" disabled>Refresh</button>
+        </div>
+        <ul id="appointmentList" class="appointment-list">
+          <li class="empty-state">Select a tenant and provider to view appointments.</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="/js/app.js" type="module"></script>
+</body>
+</html>

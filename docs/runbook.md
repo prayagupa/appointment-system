@@ -11,7 +11,7 @@
 | Port | Purpose |
 |------|---------|
 | 9090 | gRPC (appointments API) |
-| 8080 | HTTP Actuator only |
+| 8080 | Web UI (`/`) and Actuator (`/actuator/*`) |
 
 ## Required headers (gRPC)
 

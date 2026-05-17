@@ -76,7 +76,7 @@ This Software Design Specification describes the architecture, components, inter
 
 **Out of scope (initial release)**
 
-- End-user web or mobile UI (consumers integrate via APIs)
+- Native mobile apps (web UI provided at `/`)
 - Billing, insurance claims, and clinical records (EHR)
 - Identity provider implementation (assumed external or pluggable)
 
@@ -226,7 +226,7 @@ appointment-rpc/
 ├── pom.xml
 ├── Dockerfile
 ├── docker-compose.yml          # app + postgres for local dev
-├── src/main/java/com/zazzercode/
+├── src/main/java/com/pratyabhi/
 │   ├── AppointmentRpcApplication.java
 │   ├── grpc/                   # @GrpcService implementations
 │   ├── service/                # @Service use cases

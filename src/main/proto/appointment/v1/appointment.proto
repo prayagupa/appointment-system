@@ -3,7 +3,7 @@ syntax = "proto3";
 package appointment.v1;
 
 option java_multiple_files = true;
-option java_package = "com.zazzercode.grpc.appointment.v1";
+option java_package = "com.pratyabhi.grpc.appointment.v1";
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
